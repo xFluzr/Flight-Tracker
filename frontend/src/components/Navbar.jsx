@@ -37,7 +37,7 @@ const Navbar = ({ viewMode, setViewMode }) => {
           <div className="flex-grow flex gap-2 ml-4">
             {/* Przycisk ODLOTY */}
             <Button 
-                onClick={() => setViewMode('departure')} // <-- TO MUSI TU BYĆ
+                onClick={() => setViewMode('departure')} 
                 startIcon={<FlightTakeoffIcon />}
                 className={isActive('departure')}
             >
@@ -46,7 +46,7 @@ const Navbar = ({ viewMode, setViewMode }) => {
 
             {/* Przycisk PRZYLOTY */}
             <Button 
-                onClick={() => setViewMode('arrival')}   // <-- TO MUSI TU BYĆ
+                onClick={() => setViewMode('arrival')}
                 startIcon={<FlightLandIcon />}
                 className={isActive('arrival')}
             >
