@@ -6,7 +6,7 @@ namespace FlightTrackerAPI.Models
     [Table("lotniska")]
     public class Airport
     {
-        [Key] // To jest klucz główny (PK)
+        [Key] 
         [Column("kod_iata")]
         public string KodIata { get; set; } // np. WAW
 

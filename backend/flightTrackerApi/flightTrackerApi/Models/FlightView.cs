@@ -13,6 +13,9 @@ namespace FlightTrackerAPI.Models
 
         [Column("linia")]
         public string? Linia { get; set; }
+        
+        [Column("linia_logo")]
+        public string? LiniaLogo { get; set; }
 
         [Column("kierunek_miasto")]
         public string? Kierunek { get; set; }
@@ -40,6 +43,9 @@ namespace FlightTrackerAPI.Models
 
         [Column("rejestracja")]
         public string? Rejestracja { get; set; }
+        
+        [Column("samolot_zdjecie")]
+        public string? SamolotZdjecie { get; set; }
 
         [Column("lotnisko_bazowe")]
         public string? LotniskoBazowe { get; set; }
@@ -47,10 +53,16 @@ namespace FlightTrackerAPI.Models
         [Column("liczba_pasazerow")]
         public int? LiczbaPasazerow { get; set; } 
 
-            [Column("zapelnienie_procent")]
+        [Column("zapelnienie_procent")]
         public decimal? Zapelnienie { get; set; }
         
         [Column("liczba_miejsc")]
-        public int? LiczbaMiejsc { get; set; } // <--- Dodaj to
+        public int? LiczbaMiejsc { get; set; } 
+        
+        [Column("linia_kod")]
+        public string? LiniaKod { get; set; } 
+
+        [Column("kierunek_kod")]
+        public string? KierunekKod { get; set; }
     }
 }

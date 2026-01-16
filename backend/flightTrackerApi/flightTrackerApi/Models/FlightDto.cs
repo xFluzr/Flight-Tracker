@@ -18,5 +18,10 @@ namespace FlightTrackerAPI.Models
         public int LiczbaPasazerow { get; set; } 
         public decimal Zapelnienie { get; set; }
         public int MaksMiejsc { get; set; }
+        public string KodLinii { get; set; }      
+        public string KodKierunku { get; set; }   
+        
+        public string? LiniaLogo { get; set; }      
+        public string? SamolotZdjecie { get; set; } 
     }
 }

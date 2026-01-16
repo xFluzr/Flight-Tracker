@@ -16,11 +16,11 @@ namespace FlightTrackerAPI.Controllers
             _context = context;
         }
 
-        // GET: api/airports
+ 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Airport>>> GetAirports()
         {
-            // Pobieramy lotniska i sortujemy alfabetycznie po mieście
+            
             return await _context.Airports
                 .OrderBy(a => a.Miasto)
                 .ToListAsync();

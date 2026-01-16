@@ -8,6 +8,7 @@ namespace FlightTrackerAPI.Data
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
         public DbSet<FlightView> Flights { get; set; }
         public DbSet<Airport> Airports { get; set; } 
+        public DbSet<Flight> FlightTable { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<FlightView>().HasNoKey().ToView("widok_tablica_lotow");
