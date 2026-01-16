@@ -1,18 +1,45 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { 
   Table, TableBody, TableCell, TableContainer, 
-  TableHead, TableRow, Paper, Typography, Box 
+  TableHead, TableRow, Paper, Typography, Box, TableSortLabel 
 } from '@mui/material';
 import AirplanemodeActiveIcon from '@mui/icons-material/AirplanemodeActive';
 import PersonIcon from '@mui/icons-material/Person';
 import StatusChip from './StatusChip';
-import FlightDetailsModal from './FlightDetailsModal'; // Upewnij się, że masz ten plik
+import FlightDetailsModal from './FlightDetailsModal';
+
+function descendingComparator(a, b, orderBy) {
+  const valA = a[orderBy] || '';
+  const valB = b[orderBy] || '';
+
+  if (orderBy === 'passengers' || orderBy === 'delay') {
+      if (Number(valB) < Number(valA)) return -1;
+      if (Number(valB) > Number(valA)) return 1;
+      return 0;
+  }
+
+  if (valB < valA) return -1;
+  if (valB > valA) return 1;
+  return 0;
+}
+
+function getComparator(order, orderBy) {
+  return order === 'desc'
+    ? (a, b) => descendingComparator(a, b, orderBy)
+    : (a, b) => -descendingComparator(a, b, orderBy);
+}
 
 const FlightTable = ({ flights, viewMode }) => {
-  
-  // --- STAN DO OBSŁUGI MODALA (POP-UP) ---
+  const [order, setOrder] = useState('asc');
+  const [orderBy, setOrderBy] = useState('sched');
   const [selectedFlight, setSelectedFlight] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleRequestSort = (property) => {
+    const isAsc = orderBy === property && order === 'asc';
+    setOrder(isAsc ? 'desc' : 'asc');
+    setOrderBy(property);
+  };
 
   const handleRowClick = (flight) => {
     setSelectedFlight(flight);
@@ -23,66 +50,75 @@ const FlightTable = ({ flights, viewMode }) => {
     setIsModalOpen(false);
     setSelectedFlight(null);
   };
-  // ----------------------------------------
 
   const isDeparture = viewMode === 'departure';
   const cityHeader = isDeparture ? "Dokąd (Kierunek)" : "Skąd (Wylot)";
 
+  const headCells = [
+    { id: 'sched', label: 'Czas' },
+    { id: 'city', label: cityHeader },
+    { id: 'flightNo', label: 'Linia / Nr Lotu' }, // Zmiana nazwy kolumny
+    { id: 'passengers', label: 'Pasażerowie' },
+    { id: 'status', label: 'Status' },
+    { id: 'plane', label: 'Samolot' },
+  ];
+
+  const sortedFlights = useMemo(() => {
+     return [...flights].sort(getComparator(order, orderBy));
+  }, [flights, order, orderBy]);
+  console.log(flights)
   return (
     <>
       <TableContainer component={Paper} elevation={3} className="rounded-xl overflow-hidden min-h-[300px]">
         <Table sx={{ minWidth: 650 }} aria-label="simple table">
-          
-          {/* NAGŁÓWKI TABELI */}
           <TableHead className="bg-slate-100">
             <TableRow>
-              <TableCell className="font-bold text-slate-600">Czas</TableCell>
-              <TableCell className="font-bold text-slate-600">{cityHeader}</TableCell>
-              <TableCell className="font-bold text-slate-600">Nr Lotu</TableCell>
-              <TableCell className="font-bold text-slate-600">Pasażerowie</TableCell> {/* NOWA KOLUMNA */}
-              <TableCell className="font-bold text-slate-600">Status</TableCell>
-              <TableCell className="font-bold text-slate-600">Samolot</TableCell>
+              {headCells.map((headCell) => (
+                <TableCell
+                  key={headCell.id}
+                  className="font-bold text-slate-600"
+                  sortDirection={orderBy === headCell.id ? order : false}
+                >
+                  <TableSortLabel
+                    active={orderBy === headCell.id}
+                    direction={orderBy === headCell.id ? order : 'asc'}
+                    onClick={() => handleRequestSort(headCell.id)}
+                  >
+                    {headCell.label}
+                  </TableSortLabel>
+                </TableCell>
+              ))}
             </TableRow>
           </TableHead>
 
-          {/* TREŚĆ TABELI */}
           <TableBody>
-            {flights.length > 0 ? (
-              flights.map((flight) => {
-                
-                // Logika wizualna: czy lot zakończony?
+            {sortedFlights.length > 0 ? (
+              sortedFlights.map((flight) => {
                 const isFinished = flight.status === 'Wystartował' || flight.status === 'Wylądował';
-                
-                // Logika wizualna: czy jest zmiana czasu?
                 const hasTimeChange = flight.act && flight.act !== flight.sched;
 
                 return (
                   <TableRow
                     key={flight.id}
-                    onClick={() => handleRowClick(flight)} // Kliknięcie otwiera popup
+                    onClick={() => handleRowClick(flight)}
                     className={`transition-colors duration-150 cursor-pointer ${
-                        // Jeśli zakończony -> szary i wyblakły, jeśli aktywny -> biały i podświetlenie po najechaniu
                         isFinished ? 'bg-slate-100 opacity-60 grayscale' : 'bg-white hover:bg-blue-50'
                     }`}
                     sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
                   >
-                    
-                    {/* 1. KOLUMNA CZASU */}
+                    {/* CZAS */}
                     <TableCell component="th" scope="row">
                       <div className="flex flex-col justify-center">
                         {hasTimeChange ? (
                           <>
-                            {/* Stary czas przekreślony */}
                             <span className="text-sm text-slate-400 line-through decoration-slate-400">
                               {flight.sched}
                             </span>
-                            {/* Nowy czas czerwony i pulsujący */}
                             <span className="text-lg font-bold text-red-600 animate-pulse">
                               {flight.act}
                             </span>
                           </>
                         ) : (
-                          // Normalny czas
                           <span className={`text-lg font-bold ${isFinished ? 'text-slate-500' : 'text-slate-800'}`}>
                             {flight.sched}
                           </span>
@@ -93,22 +129,39 @@ const FlightTable = ({ flights, viewMode }) => {
                       </div>
                     </TableCell>
 
-                    {/* 2. KOLUMNA KIERUNKU (MIASTO) - Bez ikony */}
+                    {/* MIASTO */}
                     <TableCell>
                         <Typography variant="h6" className={`font-semibold ${isFinished ? 'text-slate-500' : 'text-slate-800'}`}>
                           {flight.city}
                         </Typography>
                     </TableCell>
 
-                    {/* 3. KOLUMNA NR LOTU */}
+                    {/* NR LOTU + LOGO (ZMIANA TUTAJ) */}
                     <TableCell>
-                      <div className={`font-bold ${isFinished ? 'text-slate-600' : 'text-blue-900'}`}>
-                          {flight.flightNo}
+                      <div className="flex items-center gap-3">
+                        {/* Wyświetlanie Loga */}
+                        {flight.airlineLogo ? (
+                            <img 
+                                src={flight.airlineLogo} 
+                                alt={flight.airline} 
+                                className="w-8 h-8 object-contain"
+                            />
+                        ) : (
+                            <div className="w-8 h-8 bg-slate-200 rounded-full flex items-center justify-center text-xs text-slate-500 font-bold">
+                                ?
+                            </div>
+                        )}
+                        
+                        <div>
+                            <div className={`font-bold ${isFinished ? 'text-slate-600' : 'text-blue-900'}`}>
+                                {flight.flightNo}
+                            </div>
+                            <div className="text-sm text-slate-500">{flight.airline}</div>
+                        </div>
                       </div>
-                      <div className="text-sm text-slate-500">{flight.airline}</div>
                     </TableCell>
 
-                    {/* 4. KOLUMNA PASAŻERÓW */}
+                    {/* PASAŻEROWIE */}
                     <TableCell>
                       <div className="flex items-center gap-1 text-slate-600 font-medium">
                           <PersonIcon fontSize="small" className="text-slate-400"/>
@@ -116,12 +169,12 @@ const FlightTable = ({ flights, viewMode }) => {
                       </div>
                     </TableCell>
 
-                    {/* 5. KOLUMNA STATUSU */}
+                    {/* STATUS */}
                     <TableCell>
                       <StatusChip status={flight.status} delay={flight.delay} />
                     </TableCell>
 
-                    {/* 6. KOLUMNA SAMOLOTU */}
+                    {/* SAMOLOT */}
                     <TableCell>
                        <Box className="flex items-start text-sm gap-2">
                           <AirplanemodeActiveIcon fontSize="small" className="text-slate-400 mt-1"/>
@@ -135,19 +188,14 @@ const FlightTable = ({ flights, viewMode }) => {
                           </div>
                       </Box>
                     </TableCell>
-
                   </TableRow>
                 );
               })
             ) : (
-              // Wiersz gdy brak danych
               <TableRow>
                 <TableCell colSpan={6} align="center" className="py-16">
                   <Typography variant="h6" className="text-slate-400 font-bold">
                     Brak lotów w wybranym dniu.
-                  </Typography>
-                  <Typography variant="body2" className="text-slate-400">
-                    Spróbuj zmienić datę w kalendarzu.
                   </Typography>
                 </TableCell>
               </TableRow>
@@ -156,7 +204,6 @@ const FlightTable = ({ flights, viewMode }) => {
         </Table>
       </TableContainer>
 
-      {/* KOMPONENT MODALA (POP-UP) */}
       <FlightDetailsModal 
         open={isModalOpen}
         onClose={handleCloseModal}

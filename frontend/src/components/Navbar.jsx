@@ -4,10 +4,12 @@ import { AppBar, Toolbar, Typography, Button, Container } from '@mui/material';
 import AirplanemodeActiveIcon from '@mui/icons-material/AirplanemodeActive';
 import FlightTakeoffIcon from '@mui/icons-material/FlightTakeoff';
 import FlightLandIcon from '@mui/icons-material/FlightLand';
-// WAŻNE: Tutaj odbieramy propsy viewMode i setViewMode
+import { useNavigate } from 'react-router-dom';
+
+
 const Navbar = ({ viewMode, setViewMode }) => {
   
-  // Funkcja zmieniająca kolor aktywnego przycisku
+  const navigate = useNavigate();
   const isActive = (mode) => 
     viewMode === mode ? "text-blue-300 bg-blue-800" : "text-gray-400 hover:text-white";
 
@@ -33,7 +35,7 @@ const Navbar = ({ viewMode, setViewMode }) => {
           >
             PolskiRadar
           </Typography>
-
+            
           <div className="flex-grow flex gap-2 ml-4">
             {/* Przycisk ODLOTY */}
             <Button 

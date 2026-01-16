@@ -26,10 +26,17 @@ const FlightDetailsModal = ({ open, onClose, flight, viewMode }) => {
       {/* NAGŁÓWEK */}
       <DialogTitle className="bg-slate-50 flex justify-between items-center border-b">
         <div className="flex flex-col">
-            <Typography variant="h5" component="div" className="font-bold text-slate-800">
-                {flight.airline}
-            </Typography>
-            <Typography variant="subtitle1" className="text-slate-500 flex items-center gap-2">
+            <div className="flex items-center gap-2">
+                {/* Logo również w nagłówku modala */}
+                {flight.airlineLogo && (
+                    <img src={flight.airlineLogo} alt="logo" className="h-6 w-auto object-contain" />
+                )}
+                <Typography variant="h5" component="div" className="font-bold text-slate-800">
+                    {flight.airline}
+                </Typography>
+            </div>
+            
+            <Typography variant="subtitle1" className="text-slate-500 flex items-center gap-2 mt-1">
                 <span className="bg-blue-100 text-blue-800 px-2 py-0.5 rounded text-sm font-mono font-bold">
                     {flight.flightNo}
                 </span>
@@ -41,6 +48,22 @@ const FlightDetailsModal = ({ open, onClose, flight, viewMode }) => {
 
       <DialogContent className="mt-4">
         
+        {/* --- NOWE: ZDJĘCIE SAMOLOTU --- */}
+        <div className="mb-6 rounded-lg overflow-hidden shadow-sm border border-slate-200">
+            {flight.planePhoto ? (
+                <img 
+                    src={flight.planePhoto} 
+                    alt={flight.plane} 
+                    className="w-full h-48 object-cover hover:scale-105 transition-transform duration-700"
+                />
+            ) : (
+                <div className="w-full h-32 bg-slate-100 flex items-center justify-center text-slate-400">
+                    <Typography variant="caption">Brak zdjęcia samolotu</Typography>
+                </div>
+            )}
+        </div>
+        {/* ----------------------------- */}
+
         {/* TRASA */}
         <Grid container spacing={2} className="mb-6 text-center items-center">
             <Grid item xs={5}>
@@ -91,7 +114,7 @@ const FlightDetailsModal = ({ open, onClose, flight, viewMode }) => {
                 )}
             </div>
 
-            {/* PASAŻEROWIE - POPRAWIONY WYGLĄD */}
+            {/* PASAŻEROWIE */}
             <div className="p-4 border rounded-lg bg-white shadow-sm">
                 <div className="flex justify-between items-end mb-2">
                     <div className="flex items-center gap-2 text-slate-600">
@@ -99,7 +122,6 @@ const FlightDetailsModal = ({ open, onClose, flight, viewMode }) => {
                         <span className="font-bold uppercase tracking-wide text-sm">Pasażerowie</span>
                     </div>
                     
-                    {/* TUTAJ ZMIANA: Czysty tekst bez ikonki w środku */}
                     <div className="text-right">
                          <span className="text-3xl font-black text-slate-800">
                             {flight.passengers}
@@ -117,7 +139,7 @@ const FlightDetailsModal = ({ open, onClose, flight, viewMode }) => {
                             variant="determinate" 
                             value={flight.occupancy || 0} 
                             color={getProgressColor(flight.occupancy)}
-                            className="h-4 rounded-full" // Trochę grubszy pasek
+                            className="h-4 rounded-full"
                         />
                     </Box>
                     <Box sx={{ minWidth: 35 }}>
